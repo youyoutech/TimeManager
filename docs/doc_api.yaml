@@ -1,0 +1,424 @@
+swagger: '2.0'
+info:
+  description: |
+    Api doc for Time Manager project
+    https://app.swaggerhub.com/apis/Totol/TimeManager/1.0.0
+  version: 1.0.0
+  title: Time-Manager
+  termsOfService: http://swagger.io/terms/
+tags:
+- name: clock
+  description: Employees can clock in/out when they start working/breaking
+- name: workingtime
+  description: A working time is the time between a clock in and a clock out
+- name: users
+  description: Operations about user
+paths:
+  /api/clock:
+    post:
+      tags:
+      - clock
+      summary: Add a new clock to the user 
+      operationId: Post new clock
+      consumes:
+      - application/json
+      parameters:
+      - in: header 
+        name: Authorization
+        type: string
+        description: User token
+      - in: body
+        name: body
+        description: Status true means clock in / false means clock out. Time must be DateTime
+        required: true
+        schema:
+          $ref: '#/definitions/Clock'
+      responses:
+        422:
+          description: Wrong body posted
+  /api/clock/:userId:
+    get:
+      tags:
+      - clock
+      summary: Finds Clock by user
+      description: Gives all the clocks of the chosen user
+      operationId: getClocksByUser
+      produces:
+      - application/json
+      parameters:
+      - in: header 
+        name: Authorization
+        type: string
+        description: User token
+      - name: userId
+        type: integer
+        in: query
+        description: Id of the user concerned
+        required: true
+      responses:
+        200:
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Clock'
+        400:
+          description: Invalid status value
+  /api/clock/:userId/last:
+    get:
+      tags:
+      - clock
+      summary: Finds the last clock of the user
+      description: Gives all the clocks of the chosen user
+      operationId: getLastClockByUser
+      produces:
+      - application/json
+      parameters:
+      - in: header 
+        name: Authorization
+        type: string
+        description: User token
+      - name: userId
+        type: integer
+        in: query
+        description: Id of the user concerned
+        required: true
+      responses:
+        200:
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Clock'
+        400:
+          description: Invalid status value
+  /api/workingtime/:userId:
+    get:
+      tags:
+      - workingtime
+      summary: get all working time between start and end passed in query parameter
+      description: '/api/workingtime/2001?start=1900-09-10T09:38:34&end=2300-09-10T09:38:34'
+      operationId: getWorkingtimeByDate
+      produces:
+      - application/json
+      parameters:
+      - in: header 
+        name: Authorization
+        type: string
+        description: User token
+      - name: workingtime
+        in: path
+        description: ID of the user
+        required: true
+        type: integer
+        format: int64
+      - name: start
+        in: path
+        description: start of working time
+        required: true
+        type: string
+      - name: end
+        in: path
+        description: end of working
+        required: true
+        type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/WorkingTime'
+    post:
+      tags:
+      - workingtime
+      summary: Post a new working time
+      operationId: postNewWorkingtime
+      parameters:
+      - in: header 
+        name: Authorization
+        type: string
+        description: User token
+      - in: body
+        name: body
+        description: User id must be valid, start and end must be convertible to timestamp
+        required: true
+        schema:
+          $ref: '#/definitions/WorkingTime'
+      consumes:
+      - application/x-www-form-urlencoded
+      produces:
+      - application/json
+      responses:
+        405:
+          description: Invalid input
+  /api/workingtime/:workingtimeid:
+    delete:
+      tags:
+      - workingtime
+      summary: Deletes a workingtime
+      operationId: deleteWorkingtime
+      parameters:
+      - in: header 
+        name: Authorization
+        type: string
+        description: User token
+      - name: workingtimeid
+        in: path
+        required: true
+        type: integer
+        format: int64
+      responses:
+        200:
+          description: Deleted
+        404:
+          description: Working time not found
+ 
+  /api/register:
+    post:
+      tags:
+      - users
+      summary: Create user
+      description: Create a user in db
+      operationId: createUser
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - in: header 
+        name: Authorization
+        type: string
+        description: User token
+      - in: body
+        name: body
+        description: Created user object
+        required: true
+        schema:
+          $ref: '#/definitions/Users'
+      responses:
+        default:
+          description: Return the user created and a connection token
+  /api/login     :   
+    post:
+      tags:
+      - users
+      summary: Logs user into the system
+      operationId: loginUser
+      produces:
+      - application/json
+      parameters:
+      - name: username
+        in: query
+        description: The user name for login
+        required: true
+        type: string
+      - name: email
+        in: query
+        description: The email of the user
+        required: true
+        type: string
+      responses:
+        200:
+          description: return the user and a connection token
+        400:
+          description: Invalid username/password supplied
+  /api/users:
+    put:
+      tags:
+      - users
+      summary: Updated user
+      description: This can only be done by the logged in user.
+      operationId: updateUser
+      produces:
+      - application/json
+      - application/xml
+      parameters:
+      - in: header 
+        name: Authorization
+        type: string
+        description: User token
+      - name: username
+        in: path
+        description: name that need to be updated
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: Updated user object
+        required: true
+        schema:
+          $ref: '#/definitions/Users'
+      responses:
+        400:
+          description: Invalid user supplied
+        404:
+          description: User not found
+    delete:
+      tags:
+      - users
+      summary: Delete user
+      description: This can only be done by the logged in user.
+      operationId: deleteUser
+      produces:
+      - application/json
+      parameters:
+      - in: header 
+        name: Authorization
+        type: string
+        description: User token
+      - name: id
+        type: integer
+        in: query
+        description: Id of the user concerned
+        required: true
+      responses:
+        400:
+          description: Invalid username supplied
+        404:
+          description: User not found
+  
+  /api/team:
+    get:
+        tags:
+        - team
+        summary: return all the teams and their users
+        operationId: getAllTeams
+        parameters:
+        - in: header 
+          name: Authorization
+          type: string
+          description: Admin token
+        produces:
+        - application/json
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/Team'
+    delete:
+        tags:
+        - team
+        summary: Deletes a team
+        operationId: deleteTeam
+        parameters:
+        - in: header 
+          name: Authorization
+          type: string
+          description: Admin token
+        - name: teamID
+          in: path
+          required: true
+          type: integer
+          format: int64
+        responses:
+          200:
+            description: Deleted
+          404:
+            description: Team not found
+    put:
+        tags:
+        - team
+        summary: Update a team
+        operationId: updateTeam
+        parameters:
+        - in: header 
+          name: Authorization
+          type: string
+          description: Admin token
+        - in: path
+          name: name
+          required: true
+          type: string
+        responses:
+          200:
+            description: Deleted
+          404:
+            description: Team not found
+  /api/team/:id:
+    get:
+        tags:
+        - team
+        summary: return the team passed in param
+        operationId: getOneTeam
+        parameters:
+        - in: header 
+          name: Authorization
+          type: string
+          description: Admin token
+        - in: path
+          name: id
+          required: true
+          type: integer
+          format: int64
+        produces:
+        - application/json
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/definitions/Team'
+definitions:
+  Users:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      username:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+  Clock:
+    type: object
+    required:
+    - name
+    - status
+    - time
+    properties:
+      user_id:
+        type: integer
+        format: int64
+        example: 1
+      status:
+        type: boolean
+        example: true
+      time:
+        type: string
+        example: "2019-09-13T17:30:00"
+  WorkingTime:
+      type: object
+      required:
+      - user_id
+      - start
+      - end
+      properties:
+        user_id:
+          type: integer
+          format: int64
+          example: 1
+        start:
+          type: string
+          example: "2019-09-13T17:30:00"
+        end:
+          type: string
+          example: "2019-09-13T17:30:00"
+  Team:
+    type: object
+    required: 
+    - name
+    properties:
+      name:
+        type: string
+        example: "Nom d'équipe"
+      user:
+        type: array
+        items:
+          minItems: 0
+          type: object
+          description: array of users
+    
+# Added by API Auto Mocking Plugin
+host: virtserver.swaggerhub.com
+basePath: /Totol/TimeManager/1.0.0
+schemes:
+ - https

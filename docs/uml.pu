@@ -1,0 +1,36 @@
+@startuml
+
+object user
+user : id(bigint)
+user : username(string)
+user : password(string)
+user : email(string)
+user : role_id(n.1 fk role)
+user : team_id(n.1 fk team)
+
+object role
+role : id(bigint)
+role : name(string)
+
+object team
+team : id(bigint)
+team : name(string)
+team : users(1.n user)
+
+object clock
+clock : id(bigint)
+clock : time(naive_datetime)
+clock : status(boolean)
+clock : user_id(n.1 fk user)
+
+object workingtime
+workingtime : id(bigint)
+workingtime : start_day(naive_datetime)
+workingtime : end_day(naive_datetime)
+workingtime : user_id(n.1 fk user)
+
+user *-- "1.n" clock
+user *-- "1.n" workingtime
+team *-- "1.n" user
+role *-- "1.n" user
+@enduml

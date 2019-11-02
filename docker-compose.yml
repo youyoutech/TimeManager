@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  db:
+    image: postgres:11-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: time_manager
+    volumes:
+      - "postgres_data:/var/lib/postgresql/data/"
+    ports:
+      - "5432:5432"
+  api:
+    build: ./back-end/
+    ports:
+      - "4000:4000"
+    env_file:
+      - back-end/.env
+    depends_on:
+      - db
+  front:
+    build: ./front-spa/
+    ports:
+      - "8080:8080"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
